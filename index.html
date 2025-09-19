@@ -99,45 +99,46 @@
           });
       }
 
-      function submitInspection(status) {
-        fetch(`${sheetAPI}/search?QR_ID=${qrId}`)
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.length === 0) return;
+ function submitInspection(status) {
+  fetch(`${sheetAPI}/search?QR_ID=${qrId}`)
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.length === 0) return;
 
-            const entry = data[0];
-            const inspections = parseInt(entry.inspections || 0) + 1;
-            const now = new Date().toLocaleString("en-GB");
+      const entry = data[0];
+      const inspections = parseInt(entry.inspections || 0) + 1;
+      const now = new Date().toLocaleString("en-GB");
 
-            fetch(`${sheetAPI}/QR_ID/${qrId}`, {
-              method: "PATCH",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                data: {
-                  inspections: inspections,
-                  status: status,
-                  Last_Inspection: now,
-                },
-              }),
-            })
-              .then((res) => res.json())
-              .then(() => {
-                document.getElementById("result").innerHTML = `
+      fetch(`${sheetAPI}/QR_ID/${qrId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          data: {
+            inspections: inspections,   
+            status: status,             
+            Last_Inspection: now       
+          }
+        }),
+      })
+        .then((res) => res.json())
+        .then(() => {
+          document.getElementById("result").innerHTML = `
             ✅ Inspection Updated<br>
             Status: <b>${status}</b><br>
             Total Inspections: ${inspections}<br>
             Last Inspection: ${now}
           `;
-                document.getElementById("actions").style.display = "none";
-              })
-              .catch((err) => {
-                document.getElementById("result").innerText =
-                  "❌ Error: " + err;
-              });
-          });
-      }
+          document.getElementById("actions").style.display = "none";
+        })
+        .catch((err) => {
+          document.getElementById("result").innerText =
+            "❌ Error: " + err;
+        });
+    });
+}
+
     </script>
   </body>
 </html>
