@@ -4,12 +4,42 @@
   <meta charset="UTF-8" />
   <title>QR Inspection Portal</title>
   <style>
-    body { font-family: Arial; padding: 20px; background: #f4f7f9; }
-    .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px #ccc; max-width: 400px; margin: auto; }
-    button { margin: 5px; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; }
-    .healthy { background: #28a745; color: white; }
-    .replace { background: #ffc107; color: black; }
-    .expired { background: #dc3545; color: white; }
+    body {
+      font-family: Arial;
+      padding: 20px;
+      background: #f4f7f9;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #ccc;
+      max-width: 400px;
+      margin: auto;
+    }
+    button {
+      margin: 5px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .healthy {
+      background: #28a745;
+      color: white;
+    }
+    .replace {
+      background: #ffc107;
+      color: black;
+    }
+    .expired {
+      background: #dc3545;
+      color: white;
+    }
+    #result {
+      margin-top: 15px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -75,10 +105,11 @@
             body: formData
           })
           .then(() => {
-            document.getElementById("result").innerHTML =
-              `✅ Inspection recorded: <b>${status}</b><br>
-               🔄 Total Inspections: ${inspections}<br>
-               ⏰ Last Inspection: ${now}`;
+            document.getElementById("result").innerHTML = `
+              ✅ Inspection recorded: <b>${status}</b><br>
+              🔄 Total Inspections: ${inspections}<br>
+              ⏰ Last Inspection: ${now}
+            `;
             document.getElementById("actions").style.display = "none";
           })
           .catch(err => {
