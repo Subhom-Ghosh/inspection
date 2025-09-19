@@ -47,18 +47,22 @@
       <h2>QR Inspection</h2>
       <div id="details">Loading...</div>
       <form action="https://sheetdb.io/api/v1/0mhx24t0s867z" method="post">
-      <div id="actions" style="display: none">
-        <p><strong>Inspection Status:</strong></p>
-        <button class="healthy" name="data[inspections]" value="Healthy">
-          Healthy
-        </button>
-        <button class="replace" name="data[inspections]" value="Needs Replacement">
-          Needs Replacement
-        </button>
-        <button class="expired" onclick="submitInspection('Expired')">
-          Expired
-        </button>
-      </div>
+        <div id="actions" style="display: none">
+          <p><strong>Inspection Status:</strong></p>
+          <button class="healthy" name="data[inspections]" value="Healthy">
+            Healthy
+          </button>
+          <button
+            class="replace"
+            name="data[inspections]"
+            value="Needs Replacement"
+          >
+            Needs Replacement
+          </button>
+          <button class="expired" onclick="submitInspection('Expired')">
+            Expired
+          </button>
+        </div>
       </form>
       <div id="result"></div>
     </div>
@@ -105,23 +109,27 @@
             const inspections = parseInt(entry.inspections || 0) + 1;
             const now = new Date().toLocaleString("en-GB");
 
-            const formData = new FormData();
-            formData.append("data[status]", status);
-            formData.append("data[inspections]", inspections);
-            formData.append("data[Last_Inspection]", now);
-
             fetch(`${sheetAPI}/QR_ID/${qrId}`, {
               method: "PATCH",
-              body: formData,
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                data: {
+                  inspections: inspections,
+                  status: status,
+                  Last_Inspection: now,
+                },
+              }),
             })
               .then((res) => res.json())
               .then(() => {
                 document.getElementById("result").innerHTML = `
-              ✅ Inspection Updated<br>
-              Status: <b>${status}</b><br>
-              Total Inspections: ${inspections}<br>
-              Last Inspection: ${now}
-            `;
+            ✅ Inspection Updated<br>
+            Status: <b>${status}</b><br>
+            Total Inspections: ${inspections}<br>
+            Last Inspection: ${now}
+          `;
                 document.getElementById("actions").style.display = "none";
               })
               .catch((err) => {
