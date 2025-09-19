@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>QR Inspection Portal</title>
+  <style>
+    body { font-family: Arial; padding: 20px; background: #f4f7f9; }
+    .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px #ccc; max-width: 400px; margin: auto; }
+    button { margin: 5px; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; }
+    .healthy { background: #28a745; color: white; }
+    .replace { background: #ffc107; color: black; }
+    .expired { background: #dc3545; color: white; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>QR Inspection</h2>
+    <div id="details">Loading...</div>
+    <div id="actions" style="display:none;">
+      <p><strong>Inspection Status:</strong></p>
+      <button class="healthy" onclick="submitInspection('Healthy')">Healthy</button>
+      <button class="replace" onclick="submitInspection('Needs Replacement')">Needs Replacement</button>
+      <button class="expired" onclick="submitInspection('Expired')">Expired</button>
+    </div>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const qrId = params.get("qr_id");
+    const sheetAPI = "https://sheetdb.io/api/v1/0mhx24t0s867z";
+
+    if (!qrId) {
+      document.getElementById("details").innerText = "❌ QR_ID missing in URL.";
+    } else {
+      fetch(`${sheetAPI}/search?QR_ID=${qrId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.length === 0) {
+            document.getElementById("details").innerText = "❌ QR_ID not found.";
+            return;
+          }
+          const entry = data[0];
+          document.getElementById("details").innerHTML = `
+            <strong>QR_ID:</strong> ${entry.QR_ID}<br>
+            <strong>Type:</strong> ${entry.Type}<br>
+            <strong>Vendor:</strong> ${entry.Vendor}<br>
+            <strong>Batch:</strong> ${entry.Batch}<br>
+            <strong>Warranty:</strong> ${entry.Warranty}<br>
+            <strong>Previous Status:</strong> ${entry.Status || "N/A"}<br>
+            <strong>Inspections:</strong> ${entry.Inspections || 0}
+          `;
+          document.getElementById("actions").style.display = "block";
+        });
+    }
+
+    function submitInspection(status) {
+      fetch(`${sheetAPI}/search?QR_ID=${qrId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.length === 0) return;
+
+          const entry = data[0];
+          const inspections = parseInt(entry.Inspections || 0) + 1;
+
+          const formData = new FormData();
+          formData.append("data[Status]", status);
+          formData.append("data[Inspections]", inspections);
+
+          fetch(`${sheetAPI}/QR_ID/${qrId}`, {
+            method: "PATCH",
+            body: formData
+          })
+          .then(() => {
+            document.getElementById("result").innerText = `✅ Inspection recorded: ${status}`;
+            document.getElementById("actions").style.display = "none";
+          });
+        });
+    }
+  </script>
+</body>
+</html>
