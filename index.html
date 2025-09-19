@@ -48,7 +48,8 @@
             <strong>Batch:</strong> ${entry.Batch}<br>
             <strong>Warranty:</strong> ${entry.Warranty}<br>
             <strong>Previous Status:</strong> ${entry.Status || "N/A"}<br>
-            <strong>Inspections:</strong> ${entry.Inspections || 0}
+            <strong>Inspections:</strong> ${entry.Inspections || 0}<br>
+            <strong>Last Inspection:</strong> ${entry.Last_Inspection || "N/A"}
           `;
           document.getElementById("actions").style.display = "block";
         });
@@ -62,18 +63,26 @@
 
           const entry = data[0];
           const inspections = parseInt(entry.Inspections || 0) + 1;
+          const now = new Date().toLocaleString("en-GB"); // DD/MM/YYYY HH:mm:ss
 
           const formData = new FormData();
           formData.append("data[Status]", status);
           formData.append("data[Inspections]", inspections);
+          formData.append("data[Last_Inspection]", now);
 
           fetch(`${sheetAPI}/QR_ID/${qrId}`, {
             method: "PATCH",
             body: formData
           })
           .then(() => {
-            document.getElementById("result").innerText = `✅ Inspection recorded: ${status}`;
+            document.getElementById("result").innerHTML =
+              `✅ Inspection recorded: <b>${status}</b><br>
+               🔄 Total Inspections: ${inspections}<br>
+               ⏰ Last Inspection: ${now}`;
             document.getElementById("actions").style.display = "none";
+          })
+          .catch(err => {
+            document.getElementById("result").innerText = "❌ Error: " + err;
           });
         });
     }
