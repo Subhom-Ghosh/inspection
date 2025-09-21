@@ -65,7 +65,6 @@
       const params = new URLSearchParams(window.location.search);
       const qrId = params.get("qr_id");
       const sheetAPI = "https://sheetdb.io/api/v1/0mhx24t0s867z";
-      // const redirectURL = "https://rail-track-smart-scan.lovable.app/";
 
       if (!qrId) {
         document.getElementById("details").innerText =
@@ -119,19 +118,25 @@
             })
               .then((res) => res.json())
               .then(() => {
+                // AI analysis based on status
+                let analysis = "";
+                if (status === "Healthy") {
+                  analysis = "✅ Nothing to worry.";
+                } else if (status === "Needs Replacement") {
+                  analysis = "🔧 Schedule maintenance soon.";
+                } else if (status === "Expired") {
+                  analysis = "⚠️ Change immediately!";
+                }
+
                 document.getElementById("result").innerHTML = `
-                  ✅ Inspection Updated<br>
+                  ✅ <b>Successfully Updated</b><br>
                   Status: <b>${status}</b><br>
                   Total Inspections: ${inspections}<br>
-                  Last Inspection: ${now}
+                  Last Inspection: ${now}<br><br>
+                  <em>AI Analysis:</em> ${analysis}
                 `;
                 document.getElementById("actions").style.display = "none";
-
-                // 🔗 Redirect after update
-              //  setTimeout(() => {
-              //    window.location.href = redirectURL;
-              //  }, 1500); // waits 1.5 sec before redirect
-            })
+              })
               .catch((err) => {
                 document.getElementById("result").innerText =
                   "❌ Error: " + err;
