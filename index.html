@@ -65,7 +65,7 @@
       const params = new URLSearchParams(window.location.search);
       const qrId = params.get("qr_id");
       const sheetAPI = "https://sheetdb.io/api/v1/0mhx24t0s867z";
-      const redirectURL = "https://rail-track-smart-scan.lovable.app/";
+      // const redirectURL = "https://rail-track-smart-scan.lovable.app/";
 
       if (!qrId) {
         document.getElementById("details").innerText =
@@ -128,10 +128,10 @@
                 document.getElementById("actions").style.display = "none";
 
                 // 🔗 Redirect after update
-                setTimeout(() => {
-                  window.location.href = redirectURL;
-                }, 1500); // waits 1.5 sec before redirect
-              })
+              //  setTimeout(() => {
+              //    window.location.href = redirectURL;
+              //  }, 1500); // waits 1.5 sec before redirect
+            })
               .catch((err) => {
                 document.getElementById("result").innerText =
                   "❌ Error: " + err;
