@@ -46,24 +46,18 @@
     <div class="card">
       <h2>QR Inspection</h2>
       <div id="details">Loading...</div>
-      <form action="https://sheetdb.io/api/v1/0mhx24t0s867z" method="post">
-        <div id="actions" style="display: none">
-          <p><strong>Inspection Status:</strong></p>
-          <button class="healthy" name="data[inspections]" value="Healthy">
-            Healthy
-          </button>
-          <button
-            class="replace"
-            name="data[inspections]"
-            value="Needs Replacement"
-          >
-            Needs Replacement
-          </button>
-          <button class="expired" onclick="submitInspection('Expired')">
-            Expired
-          </button>
-        </div>
-      </form>
+      <div id="actions" style="display: none">
+        <p><strong>Inspection Status:</strong></p>
+        <button class="healthy" onclick="submitInspection('Healthy')">
+          Healthy
+        </button>
+        <button class="replace" onclick="submitInspection('Needs Replacement')">
+          Needs Replacement
+        </button>
+        <button class="expired" onclick="submitInspection('Expired')">
+          Expired
+        </button>
+      </div>
       <div id="result"></div>
     </div>
 
@@ -71,6 +65,7 @@
       const params = new URLSearchParams(window.location.search);
       const qrId = params.get("qr_id");
       const sheetAPI = "https://sheetdb.io/api/v1/0mhx24t0s867z";
+      const redirectURL = "https://rail-track-smart-scan.lovable.app/";
 
       if (!qrId) {
         document.getElementById("details").innerText =
@@ -86,59 +81,63 @@
             }
             const entry = data[0];
             document.getElementById("details").innerHTML = `
-            <strong>QR_ID:</strong> ${entry.QR_ID}<br>
-            <strong>Type:</strong> ${entry.Type}<br>
-            <strong>Vendor:</strong> ${entry.Vendor}<br>
-            <strong>Batch:</strong> ${entry.Batch}<br>
-            <strong>Warranty:</strong> ${entry.Warranty}<br>
-            <strong>Previous Status:</strong> ${entry.status || "N/A"}<br>
-            <strong>Inspections:</strong> ${entry.inspections || 0}<br>
-            <strong>Last Inspection:</strong> ${entry.Last_Inspection || "N/A"}
-          `;
+              <strong>QR_ID:</strong> ${entry.QR_ID}<br>
+              <strong>Type:</strong> ${entry.Type}<br>
+              <strong>Vendor:</strong> ${entry.Vendor}<br>
+              <strong>Batch:</strong> ${entry.Batch}<br>
+              <strong>Warranty:</strong> ${entry.Warranty}<br>
+              <strong>Previous Status:</strong> ${entry.status || "N/A"}<br>
+              <strong>Inspections:</strong> ${entry.inspections || 0}<br>
+              <strong>Last Inspection:</strong> ${entry.Last_Inspection || "N/A"}
+            `;
             document.getElementById("actions").style.display = "block";
           });
       }
 
- function submitInspection(status) {
-  fetch(`${sheetAPI}/search?QR_ID=${qrId}`)
-    .then((res) => res.json())
-    .then((data) => {
-      if (data.length === 0) return;
+      function submitInspection(status) {
+        fetch(`${sheetAPI}/search?QR_ID=${qrId}`)
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.length === 0) return;
 
-      const entry = data[0];
-      const inspections = parseInt(entry.inspections || 0) + 1;
-      const now = new Date().toLocaleString("en-GB");
+            const entry = data[0];
+            const inspections = parseInt(entry.inspections || 0) + 1;
+            const now = new Date().toLocaleString("en-GB");
 
-      fetch(`${sheetAPI}/QR_ID/${qrId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          data: {
-            inspections: inspections,   
-            status: status,             
-            Last_Inspection: now       
-          }
-        }),
-      })
-        .then((res) => res.json())
-        .then(() => {
-          document.getElementById("result").innerHTML = `
-            ✅ Inspection Updated<br>
-            Status: <b>${status}</b><br>
-            Total Inspections: ${inspections}<br>
-            Last Inspection: ${now}
-          `;
-          document.getElementById("actions").style.display = "none";
-        })
-        .catch((err) => {
-          document.getElementById("result").innerText =
-            "❌ Error: " + err;
-        });
-    });
-}
+            fetch(`${sheetAPI}/QR_ID/${qrId}`, {
+              method: "PATCH",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                data: {
+                  inspections: inspections,
+                  status: status,
+                  Last_Inspection: now,
+                },
+              }),
+            })
+              .then((res) => res.json())
+              .then(() => {
+                document.getElementById("result").innerHTML = `
+                  ✅ Inspection Updated<br>
+                  Status: <b>${status}</b><br>
+                  Total Inspections: ${inspections}<br>
+                  Last Inspection: ${now}
+                `;
+                document.getElementById("actions").style.display = "none";
 
+                // 🔗 Redirect after update
+                setTimeout(() => {
+                  window.location.href = redirectURL;
+                }, 1500); // waits 1.5 sec before redirect
+              })
+              .catch((err) => {
+                document.getElementById("result").innerText =
+                  "❌ Error: " + err;
+              });
+          });
+      }
     </script>
   </body>
 </html>
